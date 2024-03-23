@@ -1,40 +1,63 @@
 #!/usr/bin/python3
-""" This file contains the FileStorage class """
+
+""" This module contains the FileStorage class """
+
+
 import json
 import os
+from json import JSONEncoder
+import datetime
 
 
 class FileStorage:
-    """ This class represents the FileStorage class """
-    __file_path = "file.json"
+    """
+    The FileStorage class is used for storing and managing files.
+    """
+
+    __file_path = "models/engine/instances.json"
     __objects = {}
 
-    def __init__(self):
-        """ Instanciates the objects of this class """
-        pass
-
     def all(self):
-        """ returns the dictionary __objects """
+        """
+        Returns all objects stored in a FileStorage object.
+
+        Returns:
+            dict: A dictionary containing all stored objects.
+        """
         return FileStorage.__objects
 
     def new(self, obj):
-        """ sets the obj with key  id in the dictionary __objects """
-        key = f"{type(obj).__name__}.{obj.id}"
+        """
+        Adds an object to a dictionary with a key generated
+        from the object's class name and id.
+
+        Args:
+          obj: Object to be added to the storage.
+            It should have "__class__" and "id" attributes.
+        """
+        key = f"{obj.__class__.__name__}.{obj.id}"
         FileStorage.__objects[key] = obj.to_dict()
 
     def save(self):
-        """ serializes __objects to the JSON file """
-        with open(FileStorage.__file_path, "w", encoding="utf-8") as __file:
-            json.dump(FileStorage.__objects, __file)
+        """
+        Saves the contents of the `__objects` dictionary to a file
+        in JSON format.
+        """
+        with open(FileStorage.__file_path, "w", encoding="utf-8") as file:
+            json.dump(FileStorage.__objects, file, cls=DateTimeEncoder)
 
     def reload(self):
-        """ deserializes the JSON file to __objects """
+        """
+        Reads data from a file and loads it into the `FileStorage` object.
+        """
+        file_path = FileStorage.__file_path
         try:
-            if os.path.exists(FileStorage.__file_path):
-                _file = FileStorage.__file_path
-                with open(f"{_file}", "r", encoding="utf-8") as _file:
-                    data = _file.read()
+            if os.path.exists(file_path):
+                file = FileStorage.__file_path
+                with open(f"{file}", "r", encoding="utf-8") as file:
+                    data = file.read()
                     FileStorage.__objects = json.loads(data)
+                file.close()
             else:
                 FileStorage.__objects = {}
         except Exception:
